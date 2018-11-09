@@ -6,6 +6,7 @@ namespace App;
 class TweetManager
 {
     const CHAT_ID = '@kyivmetrotweet';
+    const KYIV_METRO_ALERTS_ID = '2857302076';
 
     private $_apiToken;
     private $_accessToken;
@@ -28,7 +29,7 @@ class TweetManager
      */
     public function manage($tweet)
     {
-        if (array_key_exists('text', $tweet)) {
+        if (array_key_exists('text', $tweet) && $tweet['user']['id_str'] === self::KYIV_METRO_ALERTS_ID && is_null($tweet['in_reply_to_status_id'])) {
             $text = $tweet['text'];
             if (array_key_exists('retweeted_status', $tweet)) {
                $text = $tweet['retweeted_status']['extended_tweet']['full_text'];
