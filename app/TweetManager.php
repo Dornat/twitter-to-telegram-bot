@@ -5,6 +5,8 @@ namespace App;
 
 class TweetManager
 {
+    const CHAT_ID = '@kyivmetrotweet';
+
     private $_apiToken;
     private $_accessToken;
     private $_accessTokenSecret;
@@ -27,9 +29,13 @@ class TweetManager
     public function manage($tweet)
     {
         if (array_key_exists('text', $tweet)) {
+            $text = $tweet['text'];
+            if (array_key_exists('retweeted_status', $tweet)) {
+               $text = $tweet['retweeted_status']['extended_tweet']['full_text'];
+            }
             $data = [
-                'chat_id' => '@kyivmetrotweet',
-                'text' => $tweet['text']
+                'chat_id' => self::CHAT_ID,
+                'text' => $text
             ];
 
             file_get_contents(
