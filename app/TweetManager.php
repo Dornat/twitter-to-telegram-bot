@@ -44,4 +44,44 @@ class TweetManager
             );
         }
     }
+
+    /**
+     * @return false|string
+     */
+    public function getApiToken()
+    {
+        return $this->_apiToken;
+    }
+
+    /**
+     * @return false|string
+     */
+    public function getAccessToken()
+    {
+        return $this->_accessToken;
+    }
+
+    /**
+     * @return false|string
+     */
+    public function getAccessTokenSecret()
+    {
+        return $this->_accessTokenSecret;
+    }
+
+    /**
+     * @return false|string
+     */
+    public function getConsumerKey()
+    {
+        return $this->_consumerKey;
+    }
+
+    /**
+     * @return false|string
+     */
+    public function getConsumerSecret()
+    {
+        return $this->_consumerSecret;
+    }
 }
