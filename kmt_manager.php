@@ -15,7 +15,7 @@ PublicStream::create(
     $tweetManager->getAccessTokenSecret(),
     $tweetManager->getConsumerKey(),
     $tweetManager->getConsumerSecret()
-)->whenTweets($tweetManager::KYIV_METRO_ALERTS_ID, function(array $tweet) use ($tweetManager) {
+)->whenTweets($tweetManager->getTwitterChannelId(), function(array $tweet) use ($tweetManager) {
     $tweetManager->manage($tweet);
     echo json_encode($tweet, JSON_PRETTY_PRINT);
 })->startListening();
