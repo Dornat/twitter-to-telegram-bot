@@ -5,8 +5,8 @@ require_once 'vendor/autoload.php';
 use Spatie\TwitterStreamingApi\PublicStream;
 use App\TweetManager;
 
-$dotenv = Dotenv\Dotenv::create(__DIR__);
-$dotenv->load();
+//$dotenv = Dotenv\Dotenv::create(__DIR__);
+//$dotenv->load();
 
 $tweetManager = new TweetManager();
 
