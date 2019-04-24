@@ -44,21 +44,130 @@ class TweetManager
     public function manage($tweet)
     {
         if (array_key_exists('text', $tweet) && $tweet['user']['id_str'] === $this->_twitterChannelId && is_null($tweet['in_reply_to_status_id'])) {
-            $text = $tweet['text'];
             if (array_key_exists('retweeted_status', $tweet)) {
-                $text = $tweet['retweeted_status']['extended_tweet']['full_text'];
+                $data = [
+                    'chat_id' => $this->_telegramChatId,
+                    'text' => $tweet['retweeted_status']['text']
+                ];
+                $this->_sendToTelegramChat($data, 'sendMessage');
+            } else {
+                if (array_key_exists('extended_entities', $tweet)) {
+                    $this->_processExtendedEntitiesMedia($tweet, $tweet['text']);
+                } elseif (array_key_exists('extended_tweet', $tweet)) {
+                    $this->_processExtendedEntitiesMedia($tweet['extended_tweet'], $tweet['extended_tweet']['full_text']);
+                } else {
+                    $text = $this->_processText($tweet['text']);
+                    if (!empty($tweet['entities'])) {
+                        if (!empty($tweet['entities']['urls'])) {
+                            foreach ($tweet['entities']['urls'] as $url) {
+                                $text .= ' ' . $url['url'];
+                            }
+                        }
+                    }
+                    $data = [
+                        'chat_id' => $this->_telegramChatId,
+                        'text' => $text
+                    ];
+                    $this->_sendToTelegramChat($data, 'sendMessage');
+                }
+            }
+        }
+    }
+
+    private function _processExtendedEntitiesMedia($tweet, $text)
+    {
+        if (!empty($tweet['extended_entities']['media'])) {
+            if ($tweet['extended_entities']['media'][0]['type'] === MediaType::ANIMATED) {
+                $data = [
+                    'chat_id' => $this->_telegramChatId,
+                    'animation' => $tweet['extended_entities']['media'][0]['video_info']['variants'][0]['url'],
+                    'caption' => $this->_processText($text)
+                ];
+                $this->_sendToTelegramChat($data, 'sendAnimation');
+            } elseif ($tweet['extended_entities']['media'][0]['type'] === MediaType::PHOTO) {
+                if (count($tweet['extended_entities']['media']) > 1) {
+                    $urls = [];
+                    foreach ($tweet['extended_entities']['media'] as $m) {
+                        $urls[] = [
+                            'type' => 'photo',
+                            'media' => $m['media_url_https']
+                        ];
+                    }
+                    $jsonSerializedUrls = json_encode($urls);
+                    $data = [
+                        'chat_id' => $this->_telegramChatId,
+                        'media' => $jsonSerializedUrls
+                    ];
+                    $this->_sendToTelegramChat($data, 'sendMediaGroup');
+                    $data = [
+                        'chat_id' => $this->_telegramChatId,
+                        'text' => $this->_processText($text)
+                    ];
+                    $this->_sendToTelegramChat($data, 'sendMessage');
+                } else {
+                    $data = [
+                        'chat_id' => $this->_telegramChatId,
+                        'photo' => $tweet['extended_entities']['media'][0]['media_url_https'],
+                        'caption' => $this->_processText($text)
+                    ];
+                    $this->_sendToTelegramChat($data, 'sendPhoto');
+                }
+            } elseif ($tweet['extended_entities']['media'][0]['type'] === MediaType::VIDEO) {
+                $maxBitrate = max(array_column($tweet['extended_entities']['media'][0]['video_info']['variants'], 'bitrate'));
+                $key = array_search($maxBitrate, array_column($tweet['extended_entities']['media'][0]['video_info']['variants'], 'bitrate'));
+                $url = $tweet['extended_entities']['media'][0]['video_info']['variants'][$key]['url'];
+                $data = [
+                    'chat_id' => $this->_telegramChatId,
+                    'video' => $url,
+                    'caption' => $this->_processText($text)
+                ];
+                $this->_sendToTelegramChat($data, 'sendVideo');
+            }
+        } else {
+            $newText = $this->_processText($text);
+            if (!empty($tweet['entities'])) {
+                if (!empty($tweet['entities']['urls'])) {
+                    foreach ($tweet['entities']['urls'] as $url) {
+                        $newText .= ' ' . $url['url'];
+                    }
+                }
             }
             $data = [
                 'chat_id' => $this->_telegramChatId,
-                'text' => $text
+                'text' => $newText
             ];
-
-            file_get_contents(
-                "https://api.telegram.org/bot{$this->_apiToken}/sendMessage?"
-                . http_build_query($data)
-            );
+            $this->_sendToTelegramChat($data, 'sendMessage');
         }
+
     }
+
+    /**
+     * @param $text
+     * @return string
+     */
+    private function _processText($text)
+    {
+        return trim(
+            preg_replace(
+                '@(https?://([-\w\.]+[-\w])+(:\d+)?(/([\w/_\.#-]*(\?\S+)?[^\.\s])?)?)$@',
+                '',
+                $text
+            )
+        );
+    }
+
+    /**
+     * @param $data
+     * @param $method
+     */
+    private function _sendToTelegramChat($data, $method)
+    {
+        file_get_contents(
+            "https://api.telegram.org/bot{$this->_apiToken}/{$method}?"
+            . http_build_query($data)
+        );
+    }
+
 
     /**
      * @return string
