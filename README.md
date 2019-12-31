@@ -1,6 +1,3 @@
-# kyivmetrotweet-manager
-Manages tweets from @kyivmetroalerts and posts them to @kyivmetrotweet
-
 # General usage
 
 This app can be used for any twitter account.
