@@ -13,3 +13,4 @@ This app can be used for any twitter account.
 * `TWITTER_CHANNEL_ID` is an id of chosen twitter account in digit form, to convert your `@twitterid` to digit form you can use [this website](https://tweeterid.com/)
 6. Run `composer update` in terminal
 7. Run the manager itself: `php kmt_manager.php`
+8. Add bot to your created channel
