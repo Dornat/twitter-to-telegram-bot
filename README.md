@@ -11,6 +11,6 @@ This app can be used for any twitter account.
 * `API_TOKEN` is your telegram bot access token
 * `TELEGRAM_CHAT_ID` is an id in form `@telegramchannelid` of your created telegram channel
 * `TWITTER_CHANNEL_ID` is an id of chosen twitter account in digit form, to convert your `@twitterid` to digit form you can use [this website](https://tweeterid.com/)
-6. Run `composer update` in terminal
+6. Run `composer install` in terminal
 7. Run the manager itself: `php kmt_manager.php`
 8. Add bot to your created channel
