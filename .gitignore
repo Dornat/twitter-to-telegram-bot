@@ -1,4 +1,7 @@
-.idea/
-vendor/
+/vendor
+/builds
+/.idea
+/.vscode
+/.vagrant
+.phpunit.result.cache
 .env
-kmt_manager.log
